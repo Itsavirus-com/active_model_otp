@@ -79,6 +79,9 @@ user.otp_code(time: Time.now + 3600) # => '317438'
 
 # Don't zero-pad to six digits
 user.otp_code(padding: false) # => '438'
+
+# Custom OTP interval
+user.otp_code(interval: 1.minute)
 ```
 
 ### Authenticating using a code
@@ -95,6 +98,14 @@ user.authenticate_otp('186522') # => false
 user.authenticate_otp('186522') # => true
 sleep 30 # lets wait again
 user.authenticate_otp('186522', drift: 60) # => true
+```
+
+### Authenticating using a custom TOTP interval
+
+```ruby
+user.authenticate_otp('186522', interval: 1.minute) # => true
+sleep 59.seconds
+user.authenticate_otp('186522', interval: 1.minute) # => true
 ```
 
 ## Counter based OTP
