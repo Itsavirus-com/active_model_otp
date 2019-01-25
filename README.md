@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/heapsource/active_model_otp.png)](https://travis-ci.org/heapsource/active_model_otp)
 [![Gem Version](https://badge.fury.io/rb/active_model_otp.svg)](http://badge.fury.io/rb/active_model_otp)
-[![Dependency Status](https://gemnasium.com/heapsource/active_model_otp.svg)](https://gemnasium.com/heapsource/active_model_otp)
-[![Code Climate](https://codeclimate.com/github/heapsource/active_model_otp/badges/gpa.svg)](https://codeclimate.com/github/heapsource/active_model_otp)
 
 
 # ActiveModel::Otp
@@ -43,7 +41,7 @@ end
 
 Note: If you're adding this to an existing user model you'll need to generate *otp_secret_key* with a migration like:
 ```ruby
-User.all.each { |user| user.update_attribute(:otp_secret_key, ROTP::Base32.random_base32) }
+User.find_each { |user| user.update_attribute(:otp_secret_key, ROTP::Base32.random_base32) }
 ```
 
 To use a custom column to store the secret key field you can use the column_name option. It is also possible to generate codes with a specified length.
@@ -76,9 +74,6 @@ user.otp_code # => '850738'
 
 # Override current time
 user.otp_code(time: Time.now + 3600) # => '317438'
-
-# Don't zero-pad to six digits
-user.otp_code(padding: false) # => '438'
 
 # Custom OTP interval
 user.otp_code(interval: 1.minute)
@@ -117,6 +112,11 @@ rails g migration AddCounterForOtpToUsers otp_counter:integer
 =>
       invoke  active_record
       create    db/migrate/20130707010931_add_counter_for_otp_to_users.rb
+```
+
+Set default value for otp_counter to 0.
+```ruby
+change_column :users, :otp_counter, :integer, default: 0
 ```
 
 In addition set the counter flag option to true

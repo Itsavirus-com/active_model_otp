@@ -1,3 +1,5 @@
+require 'pry'
+
 module ActiveModel
   module OneTimePassword
     extend ActiveSupport::Concern
@@ -50,7 +52,7 @@ module ActiveModel
         else
           totp = ROTP::TOTP.new(otp_column, interval: get_otp_interval(options), digits: otp_digits)
           if drift = options[:drift]
-            totp.verify_with_drift(code, drift)
+            totp.verify(code, drift_behind: drift)
           else
             totp.verify(code)
           end
@@ -67,12 +69,10 @@ module ActiveModel
         else
           if options.is_a? Hash
             time = options.fetch(:time, Time.now)
-            padding = options.fetch(:padding, true)
           else
             time = options
-            padding = true
           end
-          ROTP::TOTP.new(otp_column, interval: get_otp_interval(options), digits: otp_digits).at(time, padding)
+          ROTP::TOTP.new(otp_column, interval: get_otp_interval(options), digits: otp_digits).at(time)
         end
       end
 
@@ -88,7 +88,11 @@ module ActiveModel
       end
 
       def get_otp_interval(options)
-        options[:interval].is_a?(Numeric) ? options[:interval] : ROTP::DEFAULT_INTERVAL
+        if options.is_a?(Hash) && options[:interval].is_a?(Numeric)
+          options[:interval]
+        else
+          ROTP::DEFAULT_INTERVAL
+        end
       end
 
       def otp_column
