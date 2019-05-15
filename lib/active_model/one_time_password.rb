@@ -1,5 +1,3 @@
-require 'pry'
-
 module ActiveModel
   module OneTimePassword
     extend ActiveSupport::Concern
